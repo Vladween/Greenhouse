@@ -3,31 +3,49 @@
 
 void Log(String& resp)
 {
-  resp += "OK: {\n\t\"temperature\": " + String(temp_value)
+  resp += "OK: {\n\t\"temperature\": " + String(temperature)
        + ",\n\t\"moistures\": [ ";
   for(uint8_t i=0; i<SOIL_SENSORS_COUNT; i++)
   {
-    resp += soil_values[i];
+    resp += moistures[i];
     if(i + 1 != SOIL_SENSORS_COUNT)
       resp += ", ";
   }
   resp += " ]";
-  resp += ",\n\t\"avg_moisture\": " + String(avg_soil)
-       + ",\n\t\"min_moisture\": " + String(min_moisture) 
+  resp += ",\n\t\"avg_moisture\": " + String(avg_moisture)
        + ",\n\t\"pump_on\": " + (pump_on ? String("true") : String("false"))
-  + "\n}\n"; 
+       + ",\n\t\"time_left\": " + String((pump_on ? -(timer - millis()) / 1000 : 0))
+       
+     + ",\n\n\t\"min_moisture\": " + String(min_moisture) 
+       + ",\n\t\"water_time\": " + String(water_time)
+       + "\n}\n";
 }
 
-bool SetMinMoisture(String& resp, const String& value)
+#define SUCCESS 0
+#define UNKNOWN_VARIABLE 1
+#define INVALID_VALUE 2
+
+int Set(String& resp, const String& param, const String& value)
 {
-  int v = value.toInt();
+  unsigned int v;
+  if(!isInt(value, v)) return INVALID_VALUE;
+  
+  if(param == "min_moisture")
+  {
+    if(v >= 100) return INVALID_VALUE;
 
-  if(v <= 0 || v > 100) return false;
+    min_moisture = v;
+  }
+  else if(param == "water_time")
+  {
+    water_time = v;
+  }
+  else
+  {
+    return UNKNOWN_VARIABLE;
+  }
 
-  min_moisture = v;
-  resp = "OK: " + String(min_moisture) + "\n";
-
-  return true;
+  return SUCCESS;
 }
 
 String ProcessCommand(uint8_t argc, String argv[])
@@ -40,10 +58,22 @@ String ProcessCommand(uint8_t argc, String argv[])
   {
     Log(resp);
   }
-  else if(argc == 2 && argv[0] == "setmois")
+  else if(argc == 3 && argv[0] == "set")
   {
-    if(!SetMinMoisture(resp, argv[1]))
-      resp = "ERROR: Invalid argument!\n";
+    int res = Set(resp, argv[1], argv[2]);
+    
+    if(res == UNKNOWN_VARIABLE)
+    {
+      resp = "ERROR: Unknown variable!\n";
+    }
+    else if (res == INVALID_VALUE)
+    {
+      resp = "ERROR: Invalid value!\n";
+    }
+    else
+    {
+      resp = "OK\n";
+    }
   }
   else
   {
@@ -53,32 +83,6 @@ String ProcessCommand(uint8_t argc, String argv[])
   return resp;
 }
 
-template<typename T>
-void pushBack(const T& value, T*& arr, uint8_t& size) noexcept
-{
-  if(size == 0)
-  {
-    arr = new T[1];
-    arr[0] = value;
-    size++;
-    return;
-  }
-
-  T* t = new T[size];
-  for(uint8_t j=0; j<size; j++)
-    t[j] = arr[j];
-
-  delete[] arr;
-  arr = new T[size + 1];
-
-  for(uint8_t j=0; j<size; j++)
-    arr[j] = t[j];
-
-  arr[size] = value;
-  size++;
-
-  delete[] t;
-}
 
 void ProcessCommands()
 {
