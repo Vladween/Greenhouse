@@ -14,25 +14,29 @@ void Log(String& resp)
   resp += " ]";
   resp += ",\n\t\"avg_moisture\": " + String(avg_moisture)
        + ",\n\t\"pump_on\": " + (pump_on ? String("true") : String("false"))
-       + ",\n\t\"time_left\": " + String((pump_on ? -(timer - millis()) / 1000 : 0))
+       + ",\n\t\"time_left\": " + String((pump_on ? water_time - (millis() - timer) / 1000 : 0))
        
      + ",\n\n\t\"min_moisture\": " + String(min_moisture) 
        + ",\n\t\"water_time\": " + String(water_time)
        + "\n}\n";
 }
 
-#define SUCCESS 0
-#define UNKNOWN_VARIABLE 1
-#define INVALID_VALUE 2
-
-int Set(String& resp, const String& param, const String& value)
+void Set(String& resp, const String& param, const String& value)
 {
   unsigned int v;
-  if(!isInt(value, v)) return INVALID_VALUE;
+  if(!isInt(value, v))
+  {
+    resp = "ERROR: Invalid argument!\n";
+    return;
+  }
   
   if(param == "min_moisture")
   {
-    if(v >= 100) return INVALID_VALUE;
+    if(v >= 100)
+    {
+      resp = "ERROR: Invalid value!\n";
+      return;
+    }
 
     min_moisture = v;
   }
@@ -42,10 +46,10 @@ int Set(String& resp, const String& param, const String& value)
   }
   else
   {
-    return UNKNOWN_VARIABLE;
+    resp = "ERROR: Unknown variable!\n";
   }
 
-  return SUCCESS;
+  resp = "OK\n";
 }
 
 String ProcessCommand(uint8_t argc, String argv[])
@@ -60,20 +64,7 @@ String ProcessCommand(uint8_t argc, String argv[])
   }
   else if(argc == 3 && argv[0] == "set")
   {
-    int res = Set(resp, argv[1], argv[2]);
-    
-    if(res == UNKNOWN_VARIABLE)
-    {
-      resp = "ERROR: Unknown variable!\n";
-    }
-    else if (res == INVALID_VALUE)
-    {
-      resp = "ERROR: Invalid value!\n";
-    }
-    else
-    {
-      resp = "OK\n";
-    }
+    Set(resp, argv[1], argv[2]);
   }
   else
   {

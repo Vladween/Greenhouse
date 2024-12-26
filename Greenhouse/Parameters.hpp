@@ -17,7 +17,7 @@ uint8_t moistures[SOIL_SENSORS_COUNT];
 uint16_t avg_moisture = 0;
 
 // Watering time, timer
-uint32_t water_time = 300, timer = millis();
+uint32_t water_time = 30, timer = millis();
 
 
 #endif

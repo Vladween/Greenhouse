@@ -40,10 +40,7 @@ bool ValuesChanged()
 // Turns on pump if needed
 void WaterPlants()
 {
-  if(millis() - timer <= water_time * 1000 && pump_on)
-  {
-    Serial.println("Skipped check");
-  }
+  if(millis() - timer <= water_time * 1000 && pump_on) return;
   
   if(pump_on)
   {
