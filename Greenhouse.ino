@@ -293,7 +293,7 @@ const String offStr         = "B\xAE""K\xA7\xB0\xAB""EHA";                      
 const String timeLeftStr    = "\xE0""o \xB3\xC3\xBA\xBB\xC6\xC0""e\xBD\xB8\xC7"; ///< "До выключения"
 const String waterTimeStr   = "Bpe\xBC\xC7"" \xBE""o\xBB\xB8\xB3""a";            ///< "Время полива"
 const String minMoistureStr = "M\xB8\xBD"". " + moistureStr;                     ///< "Мин. Влажность"
-const String secStr         = "c\xBC\xBA";                                       ///< "сек"
+const String secStr         = "ce\xBA";                                       ///< "сек"
 
 byte degreeGlyph[] = {
   0b00110,
@@ -400,7 +400,7 @@ void Print()
   case Moisture4: ///<
   case Moisture5: ///<
     lcd.print(moistureStr + " " + String((int)currentState) + ":");
-    PrintPercent(soilSensors[(int)currentState - 1].value())
+    PrintPercent(soilSensors[(int)currentState - 1].value());
     break;
   case AvgMoisture: ///< Вывод средней арифметической влажности почвы
     lcd.print("Cp. " + moistureStr + ":");
@@ -413,24 +413,15 @@ void Print()
     break;
   case TimeLeft: ///< Вывод оставшегося до конца полива времени
     lcd.print(timeLeftStr + ":");
-    lcd.setCursor(9, 1);
-    lcd.print((pumpOn ? waterTime - (millis() - waterTimer) / 1000 : 0));
-    lcd.setCursor(14, 1);
-    lcd.print("c");
+    PrintTime((pumpOn ? waterTime - (millis() - waterTimer) / 1000 : 0));
     break;
   case MinMoisture: ///< Вывод минимальной позволенной влажности почвы
     lcd.print(minMoistureStr + ":");
-    lcd.setCursor(11, 1);
-    lcd.print(minMoisture);
-    lcd.setCursor(14, 1);
-    lcd.print("%");
+    PrintPercent(minMoisture);
     break;
   case WaterTime: ///< Вывод времени полива
     lcd.print(waterTimeStr + ":");
-    lcd.setCursor(9, 1);
-    lcd.print(waterTime);
-    lcd.setCursor(14, 1);
-    lcd.print("c");
+    PrintTime(waterTime);
     break;
   }
 }
@@ -530,7 +521,7 @@ void loop()
     else
     {
       digitalWrite(LCD_BG_PIN, HIGH);
-      print();
+      Print();
     }
     powerOn = !powerOn;
   }
