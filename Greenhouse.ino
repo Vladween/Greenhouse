@@ -293,7 +293,7 @@ const String offStr         = "B\xAE""K\xA7\xB0\xAB""EHA";                      
 const String timeLeftStr    = "\xE0""o \xB3\xC3\xBA\xBB\xC6\xC0""e\xBD\xB8\xC7"; ///< "До выключения"
 const String waterTimeStr   = "Bpe\xBC\xC7"" \xBE""o\xBB\xB8\xB3""a";            ///< "Время полива"
 const String minMoistureStr = "M\xB8\xBD"". " + moistureStr;                     ///< "Мин. Влажность"
-const String secStr         = "ce\xBA";                                       ///< "сек"
+const String secStr         = "ce\xBA";                                          ///< "сек"
 
 byte degreeGlyph[] = {
   0b00110,
@@ -325,7 +325,7 @@ State currentState = Temperature; /// Текущий тип выводимых �
 
 /// Изменяемые параметры
 uint8_t minMoisture = 50; ///< Минимальная позволенная влажность почвы. Если средняя арифметическая влажность почвы меньше этого значения, включается помпа
-uint32_t waterTime  = 30; ///< Время полива
+uint32_t waterTime  = 5;  ///< Время полива
 
 /// Состояние помпы
 bool pumpOn           = false; ///< Текущее состояние помпы (Вкл/Выкл)
@@ -561,7 +561,7 @@ void loop()
         minMoisture--;
         valueChanged = true;
       }
-      else if(currentState == WaterTime && waterTime > 5)
+      else if(currentState == WaterTime && waterTime > 1)
       {
         waterTime--;
         valueChanged = true;
